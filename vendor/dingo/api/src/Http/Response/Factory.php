@@ -118,14 +118,14 @@ class Factory
     /**
      * Bind an item to a transformer and start building a response.
      *
-     * @param object                 $item
-     * @param string|callable|object $transformer
-     * @param array                  $parameters
-     * @param \Closure               $after
+     * @param object                         $item
+     * @param null|string|callable|object    $transformer
+     * @param array                          $parameters
+     * @param \Closure                       $after
      *
      * @return \Dingo\Api\Http\Response
      */
-    public function item($item, $transformer, $parameters = [], Closure $after = null)
+    public function item($item, $transformer = null, $parameters = [], Closure $after = null)
     {
         // Check for $item being null
         if (! is_null($item)) {
@@ -149,16 +149,48 @@ class Factory
     }
 
     /**
+     * Bind an arbitrary array to a transformer and start building a response.
+     *
+     * @param array $array
+     * @param $transformer
+     * @param array $parameters
+     * @param Closure|null $after
+     *
+     * @return Response
+     */
+    public function array(array $array, $transformer = null, $parameters = [], Closure $after = null)
+    {
+        if ($parameters instanceof \Closure) {
+            $after = $parameters;
+            $parameters = [];
+        }
+
+        // For backwards compatibility, allow no transformer
+        if ($transformer) {
+            // Use the PHP stdClass for this purpose, as a work-around, since we need to register a class binding
+            $class = 'stdClass';
+            // This will convert the array into an stdClass
+            $array = (object) $array;
+
+            $binding = $this->transformer->register($class, $transformer, $parameters, $after);
+        } else {
+            $binding = null;
+        }
+
+        return new Response($array, 200, [], $binding);
+    }
+
+    /**
      * Bind a paginator to a transformer and start building a response.
      *
      * @param \Illuminate\Contracts\Pagination\Paginator $paginator
-     * @param string|callable|object                     $transformer
+     * @param null|string|callable|object                $transformer
      * @param array                                      $parameters
      * @param \Closure                                   $after
      *
      * @return \Dingo\Api\Http\Response
      */
-    public function paginator(Paginator $paginator, $transformer, array $parameters = [], Closure $after = null)
+    public function paginator(Paginator $paginator, $transformer = null, array $parameters = [], Closure $after = null)
     {
         if ($paginator->isEmpty()) {
             $class = get_class($paginator);

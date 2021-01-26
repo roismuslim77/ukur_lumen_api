@@ -10,7 +10,6 @@ use Illuminate\Http\Response;
 use Dingo\Api\Contract\Debug\ExceptionHandler;
 use Dingo\Api\Contract\Debug\MessageBagErrors;
 use Illuminate\Contracts\Debug\ExceptionHandler as IlluminateExceptionHandler;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use ReflectionFunction;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -184,7 +183,7 @@ class Handler implements ExceptionHandler, IlluminateExceptionHandler
 
         $response = $this->newResponseArray();
 
-        array_walk_recursive($response, function (&$value, $key) use ($exception, $replacements) {
+        array_walk_recursive($response, function (&$value, $key) use ($replacements) {
             if (Str::startsWith($value, ':') && isset($replacements[$value])) {
                 $value = $replacements[$value];
             }
@@ -204,11 +203,23 @@ class Handler implements ExceptionHandler, IlluminateExceptionHandler
      */
     protected function getStatusCode(Throwable $exception)
     {
+        $statusCode = null;
+
         if ($exception instanceof ValidationException) {
-            return $exception->status;
+            $statusCode = $exception->status;
+        } elseif ($exception instanceof HttpExceptionInterface) {
+            $statusCode = $exception->getStatusCode();
+        } else {
+            // By default throw 500
+            $statusCode = 500;
         }
 
-        return $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
+        // Be extra defensive
+        if ($statusCode < 100 || $statusCode > 599) {
+            $statusCode = 500;
+        }
+
+        return $statusCode;
     }
 
     /**
@@ -245,16 +256,11 @@ class Handler implements ExceptionHandler, IlluminateExceptionHandler
 
         if ($exception instanceof MessageBagErrors && $exception->hasErrors()) {
             $replacements[':errors'] = $exception->getErrors();
-            // dd($replacements[':errors']);
-            $myErrors = Arr::flatten($exception->getErrors());
-            $replacements[':message'] = implode(', ', $myErrors);
         }
 
         if ($exception instanceof ValidationException) {
             $replacements[':errors'] = $exception->errors();
             $replacements[':status_code'] = $exception->status;
-            $myErrors = Arr::flatten($exception->errors());
-            $replacements[':message'] = implode(', ', $myErrors);
         }
 
         if ($code = $exception->getCode()) {

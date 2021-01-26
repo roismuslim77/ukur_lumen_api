@@ -31,11 +31,19 @@ $api->version('v1', function ($api) {
         });
 
         $api->group(['middleware' => 'auth'], function() use($api) {
-
             $api->get('version/auth', function () {
                 return response()->json(['status' => 'success', 'message' => env('APP_VERSION')], 200);
             });
             
+        });
+
+        //crud firebase
+        $api->group(['prefix' => 'user'], function () use($api){
+            $api->get('/', 'UserController@index');
+            $api->get('/{id}', 'UserController@show');
+            $api->post('/', 'UserCotroller@store');
+            $api->put('/{id}', 'UserController@update');
+            $api->delete('/{id}', 'UserCotroller@delete');
         });
     });
 });

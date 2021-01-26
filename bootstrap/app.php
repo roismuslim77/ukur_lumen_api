@@ -108,6 +108,9 @@ $app->alias('mail.manager', Illuminate\Contracts\Mail\Factory::class);
 $app->alias('mailer', Illuminate\Mail\Mailer::class);
 $app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class);
 $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
+
+$app->register(Kreait\Laravel\Firebase\ServiceProvider::class);
+$app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -175,12 +178,6 @@ app('Dingo\Api\Exception\Handler')->register(function (Throwable $exception) {
         . ' on Line ' . $exception->getLine();
 
     if (!env('APP_DEBUG', false)) {
-
-        Mail::raw($message, function ($m) {
-            $m->to('itks.dept@gmail.com');
-            $m->subject('Error in end-customer-api (' . date('Y-m-d H:i:s') . ')');
-        });
-
         $message = 'Saat ini kami sedang maintenance. Silahkan coba kembali dua jam kemudian. Mohon maaf atas ketidaknyamanannya.';
     }
     

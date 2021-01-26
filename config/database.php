@@ -4,7 +4,7 @@ return [
 
     'migrations' => 'migrations',
 
-    'default' => env('DB_CONNECTION', 'mysql_ec'),
+    'default' => env('DB_CONNECTION', 'mysql_db2'),
 
     'connections' => [
 
@@ -29,7 +29,7 @@ return [
             ]) : [],
         ],
 
-        'mysql_ec' => [
+        'mysql_db2' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB2_HOST', '127.0.0.1'),

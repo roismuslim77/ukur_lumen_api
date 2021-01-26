@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Broadcasting\Factory as BroadcastFactory;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Database\Eloquent\Factory;
 use Laravel\Lumen\Bus\PendingDispatch;
 
 if (! function_exists('abort')) {
@@ -39,6 +41,23 @@ if (! function_exists('app')) {
         }
 
         return Container::getInstance()->make($make, $parameters);
+    }
+}
+
+if (! function_exists('auth')) {
+    /**
+     * Get the available auth instance.
+     *
+     * @param  string|null  $guard
+     * @return \Illuminate\Contracts\Auth\Factory|\Illuminate\Contracts\Auth\Guard|\Illuminate\Contracts\Auth\StatefulGuard
+     */
+    function auth($guard = null)
+    {
+        if (is_null($guard)) {
+            return app(AuthFactory::class);
+        }
+
+        return app(AuthFactory::class)->guard($guard);
     }
 }
 
@@ -184,7 +203,7 @@ if (! function_exists('factory')) {
     {
         app('db');
 
-        $factory = app('Illuminate\Database\Eloquent\Factory');
+        $factory = app(Factory::class);
 
         $arguments = func_get_args();
 
@@ -244,6 +263,30 @@ if (! function_exists('report')) {
     function report(Throwable $exception)
     {
         app(ExceptionHandler::class)->report($exception);
+    }
+}
+
+if (! function_exists('request')) {
+    /**
+     * Get an instance of the current request or an input item from the request.
+     *
+     * @param  array|string|null  $key
+     * @param  mixed  $default
+     * @return \Illuminate\Http\Request|string|array
+     */
+    function request($key = null, $default = null)
+    {
+        if (is_null($key)) {
+            return app('request');
+        }
+
+        if (is_array($key)) {
+            return app('request')->only($key);
+        }
+
+        $value = app('request')->__get($key);
+
+        return is_null($value) ? value($default) : $value;
     }
 }
 
