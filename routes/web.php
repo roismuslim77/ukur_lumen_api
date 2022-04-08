@@ -10,7 +10,6 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-use Illuminate\Support\Facades\DB;
 
 $router->get('/', function () use ($router) {
     return $router->app->version();
@@ -25,25 +24,22 @@ $api->version('v1', function ($api) {
             return response()->json(['status' => 'success', 'message' => env('APP_VERSION')], 200);
         });
 
-        $api->get('dbTime', function () {
-            $results = DB::select( "select date_format(now(),'%Y-%m-%d %H:%i:%s') db_time" );
-            return response()->json(['status' => 'success', 'message' => $results[0]->db_time], 200);
-        });
-
         $api->group(['middleware' => 'auth'], function() use($api) {
             $api->get('version/auth', function () {
                 return response()->json(['status' => 'success', 'message' => env('APP_VERSION')], 200);
             });
-            
+        
+            $api->group(['prefix' => 'auth'], function () use($api){
+                $api->post('/logout', 'Auth\LoginController@logout');
+            });
         });
 
-        //crud firebase
-        $api->group(['prefix' => 'user'], function () use($api){
-            $api->get('/', 'UserController@index');
-            $api->get('/{id}', 'UserController@show');
-            $api->post('/', 'UserCotroller@store');
-            $api->put('/{id}', 'UserController@update');
-            $api->delete('/{id}', 'UserCotroller@delete');
+        $api->group(['prefix' => 'auth'], function () use($api){
+            $api->post('/login', 'Auth\LoginController@login');
+        });
+
+        $api->group(['prefix' => 'balance'], function () use($api){
+            $api->post('/create', 'BalanceController@store');
         });
     });
 });

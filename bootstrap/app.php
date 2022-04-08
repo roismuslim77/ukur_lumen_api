@@ -109,8 +109,6 @@ $app->alias('mailer', Illuminate\Mail\Mailer::class);
 $app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class);
 $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 
-$app->register(Kreait\Laravel\Firebase\ServiceProvider::class);
-$app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

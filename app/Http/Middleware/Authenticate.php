@@ -38,7 +38,7 @@ class Authenticate
         if ($this->auth->guard($guard)->guest()) {
             return abort(401, 'Unauthorized.');
         }
-
+        
         return $next($request);
     }
 }

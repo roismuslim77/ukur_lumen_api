@@ -7,6 +7,21 @@ return [
     'default' => env('DB_CONNECTION', 'mysql_db2'),
 
     'connections' => [
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DBPG_HOST', '127.0.0.1'),
+            'port' => env('DBPG_PORT', '3306'),
+            'database' => env('DBPG_DATABASE', 'forge'),
+            'username' => env('DBPG_USERNAME', 'forge'),
+            'password' => env('DBPG_PASSWORD', ''),
+            'unix_socket' => env('DBPG_SOCKET', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_general_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
 
         'mysql_cdb' => [
             'driver' => 'mysql',
